@@ -101,7 +101,7 @@ func checkDaemon() {
 	}
 	log.Println(len(newPosts), "new posts")
 	if newFound {
-		saveHashes(hashes)
+		//@@@ saveHashes(hashes)
 		sendMails(newPosts)
 	}
 }

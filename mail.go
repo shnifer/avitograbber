@@ -21,7 +21,7 @@ func (p PostData) toHTML() string {
 
 func genHTML(posts []PostData) []byte {
 	var res string
-	res = res + "<h2>Новые поступления на авито:<h2>"
+	res = res + "<h2>Новые поступления:<h2>"
 	for _, post := range posts {
 		res = res + "<br>" + post.toHTML()
 	}
