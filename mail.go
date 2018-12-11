@@ -10,14 +10,14 @@ import (
 
 type MailOptions struct {
 	From     string
-	Addr     string
+	Host     string
+	Port     string
 	UserName string
 	Password string
-	Host     string
 }
 
 func (p PostData) toHTML() string {
-	return fmt.Sprintf("<a href=\"%v\">%v</a> $%v руб.", p.Href, p.Title, p.Price)
+	return fmt.Sprintf("<a href=\"%v\">%v</a> %v руб.", p.Href, p.Title, p.Price)
 }
 
 func genHTML(posts []PostData) []byte {
@@ -36,7 +36,7 @@ func sendMails(posts []PostData) {
 	mail.From = opts.From
 	mail.HTML = genHTML(posts)
 	mail.Subject = "новые позиции!"
-	err := mail.SendWithTLS(opts.Addr, smtp.PlainAuth("", opts.UserName, opts.Password, opts.Host),
+	err := mail.SendWithTLS(opts.Host+opts.Port, smtp.PlainAuth("", opts.UserName, opts.Password, opts.Host),
 		&tls.Config{
 			ServerName: "smtp.rambler.ru",
 		})

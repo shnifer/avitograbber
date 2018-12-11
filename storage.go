@@ -9,13 +9,6 @@ import (
 
 var disk *diskv.Diskv
 
-func init() {
-	disk = diskv.New(diskv.Options{
-		CacheSizeMax: 1024 * 1024,
-		BasePath:     "storage",
-	})
-}
-
 func getURLList() []string {
 	urls, err := disk.Read("url-list")
 	if err != nil {

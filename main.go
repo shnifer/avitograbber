@@ -12,10 +12,6 @@ import (
 	"time"
 )
 
-func server() {
-
-}
-
 var client *http.Client
 
 func loadURL(urlStr string) ([]PostData, error) {
@@ -85,24 +81,27 @@ func getAllPosts() []PostData {
 }
 
 func checkDaemon() {
-	posts := getAllPosts()
-	log.Println("all posts ", len(posts))
-	hashes := usedHashes()
-	newFound := false
-	newPosts := make([]PostData, 0)
-	for _, post := range posts {
-		hash := post.hash()
-		if _, exist := hashes[hash]; exist {
-			continue
+	tick := time.Tick(time.Minute * 5)
+	for range tick {
+		posts := getAllPosts()
+		log.Println("all posts ", len(posts))
+		hashes := usedHashes()
+		newFound := false
+		newPosts := make([]PostData, 0)
+		for _, post := range posts {
+			hash := post.hash()
+			if _, exist := hashes[hash]; exist {
+				continue
+			}
+			newFound = true
+			hashes[hash] = struct{}{}
+			newPosts = append(newPosts, post)
 		}
-		newFound = true
-		hashes[hash] = struct{}{}
-		newPosts = append(newPosts, post)
-	}
-	log.Println(len(newPosts), "new posts")
-	if newFound {
-		//@@@ saveHashes(hashes)
-		sendMails(newPosts)
+		log.Println(len(newPosts), "new posts")
+		if newFound {
+			saveHashes(hashes)
+			sendMails(newPosts)
+		}
 	}
 }
 
@@ -113,9 +112,8 @@ func main() {
 	}
 
 	go server()
-	checkDaemon()
+	go checkDaemon()
 
-	return
 	interrupt := make(chan os.Signal)
 	signal.Notify(interrupt, os.Interrupt)
 	<-interrupt
