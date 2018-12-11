@@ -59,23 +59,6 @@ func saveHashes(m map[[16]byte]struct{}) {
 	disk.Write("used-hashes", hashes)
 }
 
-func getEmails() []string {
-	urls, err := disk.Read("emails")
-	if err != nil {
-		log.Println("can't read emails")
-		return []string{}
-	}
-	res := strings.Split(string(urls), "\n")
-	result := make([]string, 0)
-	for _, s := range res {
-		s = strings.TrimSpace(s)
-		if s != "" {
-			result = append(result, s)
-		}
-	}
-	return result
-}
-
 func getMailOptions() MailOptions {
 	buf, err := disk.Read("mail-opts")
 	if err != nil {

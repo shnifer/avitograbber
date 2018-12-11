@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/tls"
 	"fmt"
 	"github.com/jordan-wright/email"
 	"log"
@@ -30,15 +31,15 @@ func genHTML(posts []PostData) []byte {
 
 func sendMails(posts []PostData) {
 	opts := getMailOptions()
-	emails := getEmails()
-	if len(emails) == 0 {
-		return
-	}
 	mail := email.NewEmail()
-	mail.To = emails
+	mail.To = []string{opts.From}
 	mail.From = opts.From
 	mail.HTML = genHTML(posts)
-	err := mail.Send(opts.Addr, smtp.PlainAuth("", opts.UserName, opts.Password, opts.Host))
+	mail.Subject = "новые позиции!"
+	err := mail.SendWithTLS(opts.Addr, smtp.PlainAuth("", opts.UserName, opts.Password, opts.Host),
+		&tls.Config{
+			ServerName: "smtp.rambler.ru",
+		})
 	if err != nil {
 		log.Println("send email error: ", err)
 	}
