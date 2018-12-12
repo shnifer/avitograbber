@@ -46,7 +46,6 @@ func indexHandler(ctx *fasthttp.RequestCtx) {
 		}
 	}()
 	ctx.SetContentType("text/html")
-	log.Println(askList)
 	err := formTemplate.Execute(ctx, askList)
 	if err != nil {
 		log.Println("execute error")
