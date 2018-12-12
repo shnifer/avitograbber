@@ -10,7 +10,9 @@
         <td>Сайт</td>
         <td>Раздел</td>
         <td>Поиск</td>
+        <td>Мин. цена</td>
         <td>Макс. цена</td>
+        <td>Только частники</td>
         <td>удалить / добавить</td>
     </tr>
     <form action="delete">
@@ -18,7 +20,10 @@
         <tr>
             <td>{{.Site}}</td>
             <td>{{getName .Site .Part}}</td>
-            <td>{{.Text}}</td><td>{{.MaxPrice}}</td>
+            <td>{{.Text}}</td>
+            <td>{{.MinPrice}}</td>
+            <td>{{.MaxPrice}}</td>
+            <td>{{if .PhysOnly}}+{{end}}</td>
             <td>
                 <button name="del" value="{{$ind}}">X</button>
             </td>
@@ -45,7 +50,17 @@
             </td>
             <td>
                 <label>
+                    <input name="minprice"/>
+                </label>
+            </td>
+            <td>
+                <label>
                     <input name="maxprice"/>
+                </label>
+            </td>
+            <td>
+                <label>
+                    <input name="physonly" type="checkbox" value="true"/>
                 </label>
             </td>
             <td>

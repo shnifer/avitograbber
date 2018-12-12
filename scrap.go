@@ -68,15 +68,15 @@ func getAllPosts() []PostData {
 				}
 
 				//filter
-				if ask.MaxPrice > 0 {
-					i := 0
-					for i < len(dat) {
-						if dat[i].Price > ask.MaxPrice {
-							dat[i] = dat[len(dat)-1]
-							dat = dat[:len(dat)-1]
-						} else {
-							i++
-						}
+				i := 0
+				for i < len(dat) {
+					delete := (dat[i].Price > ask.MaxPrice && ask.MaxPrice > 0) ||
+						(dat[i].Price < ask.MinPrice && ask.MinPrice > 0)
+					if delete {
+						dat[i] = dat[len(dat)-1]
+						dat = dat[:len(dat)-1]
+					} else {
+						i++
 					}
 				}
 				outCh <- dat
@@ -96,25 +96,29 @@ func getAllPosts() []PostData {
 	return result
 }
 
+func doCheck() {
+	posts := getAllPosts()
+	hashes := usedHashes()
+	newFound := false
+	newPosts := make([]PostData, 0)
+	for _, post := range posts {
+		hash := post.hash()
+		if _, exist := hashes[hash]; exist {
+			continue
+		}
+		newFound = true
+		hashes[hash] = struct{}{}
+		newPosts = append(newPosts, post)
+	}
+	if newFound {
+		saveHashes(hashes)
+		sendMails(newPosts)
+	}
+}
+
 func checkDaemon() {
-	tick := time.Tick(time.Minute * 1)
+	tick := time.Tick(time.Minute * 10)
 	for range tick {
-		posts := getAllPosts()
-		hashes := usedHashes()
-		newFound := false
-		newPosts := make([]PostData, 0)
-		for _, post := range posts {
-			hash := post.hash()
-			if _, exist := hashes[hash]; exist {
-				continue
-			}
-			newFound = true
-			hashes[hash] = struct{}{}
-			newPosts = append(newPosts, post)
-		}
-		if newFound {
-			saveHashes(hashes)
-			sendMails(newPosts)
-		}
+		doCheck()
 	}
 }

@@ -13,6 +13,8 @@ type ask struct {
 	Site     string
 	Part     string
 	Text     string
+	PhysOnly bool
+	MinPrice int
 	MaxPrice int
 }
 
@@ -65,7 +67,7 @@ func writeAskListToDB() {
 	disk.Write("asks", buf)
 }
 
-func NewAsk(site, part, text string, maxPrice int) (ask, error) {
+func NewAsk(site, part, text string, minPrice, maxPrice int, physOnly bool) (ask, error) {
 	if !validSitePart(site, part) {
 		return ask{}, errors.New("Non valid site-part pair ")
 	}
@@ -73,6 +75,8 @@ func NewAsk(site, part, text string, maxPrice int) (ask, error) {
 		Site:     site,
 		Part:     part,
 		Text:     text,
+		PhysOnly: physOnly,
+		MinPrice: minPrice,
 		MaxPrice: maxPrice,
 	}, nil
 }
@@ -112,11 +116,19 @@ func (a ask) GetURL() string {
 }
 
 func avitoURL(a ask) string {
+	user := ""
+	if a.PhysOnly {
+		user = "user=1&"
+	}
 	text := url.QueryEscape(a.Text)
-	return fmt.Sprintf("http://www.avito.ru/moskva/%v?q=%v", a.Part, text)
+	return fmt.Sprintf("http://www.avito.ru/moskva/%v?%vq=%v", a.Part, user, text)
 }
 
 func youlaURL(a ask) string {
+	user := ""
+	if a.PhysOnly {
+		user = "user=1&"
+	}
 	text := url.QueryEscape(a.Text)
-	return fmt.Sprintf("http://youla.ru/moskva/%v?q=%v", a.Part, text)
+	return fmt.Sprintf("http://youla.ru/moskva/%v?%vq=%v", a.Part, user, text)
 }

@@ -85,15 +85,21 @@ func addHandler(ctx *fasthttp.RequestCtx) {
 	site := string(ctx.FormValue("add"))
 	part := string(ctx.FormValue("part"))
 	search := string(ctx.FormValue("search"))
+	minprice, err := strconv.Atoi(string(ctx.FormValue("minprice")))
+	if err != nil {
+		minprice = 0
+	}
 	maxprice, err := strconv.Atoi(string(ctx.FormValue("maxprice")))
 	if err != nil {
 		maxprice = 0
 	}
-	ask, err := NewAsk(site, part, search, maxprice)
+	physOnly := string(ctx.FormValue("physonly")) != ""
+	ask, err := NewAsk(site, part, search, minprice, maxprice, physOnly)
 	if err != nil {
 		log.Println("NewAsk: ", err)
 		return
 	}
 
 	AppendAskList(ask)
+	doCheck()
 }
