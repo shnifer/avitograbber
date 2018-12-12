@@ -25,8 +25,7 @@ func initTemplate() {
 
 	formTemplate, err = template.New("form").Funcs(fMap).Parse(string(buf))
 	if err != nil {
-		log.Println("template parse error: ", err)
-		return
+		panic("template parse error: " + err.Error())
 	}
 }
 
