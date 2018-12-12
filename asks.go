@@ -3,7 +3,10 @@ package main
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log"
+	"net/url"
+	"sync"
 )
 
 type ask struct {
@@ -19,6 +22,7 @@ type SiteParts struct {
 }
 
 var siteParts SiteParts
+var askmu sync.Mutex
 var askList []ask
 
 func initAsks() {
@@ -36,6 +40,8 @@ func initAsks() {
 }
 
 func DeleteAsList(ind int) {
+	askmu.Lock()
+	defer askmu.Unlock()
 	if ind < 0 || ind >= len(askList) {
 		log.Println("deleted element out of range!")
 		return
@@ -45,6 +51,8 @@ func DeleteAsList(ind int) {
 }
 
 func AppendAskList(a ask) {
+	askmu.Lock()
+	defer askmu.Unlock()
 	askList = append(askList, a)
 	go writeAskListToDB()
 }
@@ -82,4 +90,33 @@ func validSitePart(site, part string) bool {
 		}
 	}
 	return true
+}
+
+func copyAskList() []ask {
+	askmu.Lock()
+	defer askmu.Unlock()
+	result := make([]ask, len(askList))
+	copy(result, askList)
+	return result
+}
+
+func (a ask) GetURL() string {
+	switch a.Site {
+	case "avito":
+		return avitoURL(a)
+	case "youla":
+		return youlaURL(a)
+	default:
+		return ""
+	}
+}
+
+func avitoURL(a ask) string {
+	text := url.QueryEscape(a.Text)
+	return fmt.Sprintf("http://www.avito.ru/moskva/%v?q=%v", a.Part, text)
+}
+
+func youlaURL(a ask) string {
+	text := url.QueryEscape(a.Text)
+	return fmt.Sprintf("http://youla.ru/moskva/%v?q=%v", a.Part, text)
 }

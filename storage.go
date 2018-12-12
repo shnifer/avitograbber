@@ -4,27 +4,9 @@ import (
 	"encoding/json"
 	"github.com/peterbourgon/diskv"
 	"log"
-	"strings"
 )
 
 var disk *diskv.Diskv
-
-func getURLList() []string {
-	urls, err := disk.Read("url-list")
-	if err != nil {
-		log.Println("can't read url-list")
-		return []string{}
-	}
-	res := strings.Split(string(urls), "\n")
-	result := make([]string, 0)
-	for _, s := range res {
-		s = strings.TrimSpace(s)
-		if s != "" {
-			result = append(result, s)
-		}
-	}
-	return result
-}
 
 func usedHashes() map[[16]byte]struct{} {
 	hashes, err := disk.Read("used-hashes")
