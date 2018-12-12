@@ -27,4 +27,5 @@ func init() {
 	}
 
 	initAsks()
+	initTemplate()
 }

@@ -45,38 +45,47 @@ func loadURL(urlStr string) ([]PostData, error) {
 func getAllPosts() []PostData {
 	const poolSize = 10
 	result := make([]PostData, 0)
-	urls := getURLList()
-	ch := make(chan []PostData)
-	wg := &sync.WaitGroup{}
-	pool := make(chan struct{}, poolSize)
-	done := make(chan struct{})
+
+	inCh := make(chan string)
+	outCh := make(chan []PostData)
+
+	//producer
 	go func() {
-		for dat := range ch {
-			result = append(result, dat...)
+		defer close(inCh)
+		urls := getURLList()
+		for _, URL := range urls {
+			inCh <- URL
 		}
-		close(done)
 	}()
 
-	for i := range urls {
-		pool <- struct{}{}
-		URL := urls[i]
+	wg := &sync.WaitGroup{}
+	for i := 0; i < poolSize; i++ {
+		//parallel worker
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			defer func() { <-pool }()
-			log.Println("loading ", URL)
-			dat, err := loadURL(URL)
-			if err != nil {
-				log.Println("Error: ", err)
-				return
+			for URL := range inCh {
+				log.Println("loading ", URL)
+				dat, err := loadURL(URL)
+				if err != nil {
+					log.Println("Error: ", err)
+					return
+				}
+				log.Printf("got %v elements from %v\n", len(dat), URL)
+				outCh <- dat
 			}
-			log.Printf("got %v elements from %v\n", len(dat), URL)
-			ch <- dat
 		}()
 	}
-	wg.Wait()
-	close(ch)
-	<-done
+	//monitor
+	go func() {
+		wg.Wait()
+		close(outCh)
+	}()
+
+	//blocking consumer
+	for dat := range outCh {
+		result = append(result, dat...)
+	}
 	return result
 }
 

@@ -26,17 +26,35 @@ func initAsks() {
 	buf, err := disk.Read("asks")
 	if err != nil {
 		log.Println("asks read error")
-		buf, err := json.Marshal(askList)
-		if err != nil {
-			return
-		}
-		disk.Write("asks", buf)
+		writeAskListToDB()
 		return
 	}
 	err = json.Unmarshal(buf, &askList)
 	if err != nil {
 		panic(err)
 	}
+}
+
+func DeleteAsList(ind int) {
+	if ind < 0 || ind >= len(askList) {
+		log.Println("deleted element out of range!")
+		return
+	}
+	askList = append(askList[:ind], askList[ind+1:]...)
+	go writeAskListToDB()
+}
+
+func AppendAskList(a ask) {
+	askList = append(askList, a)
+	go writeAskListToDB()
+}
+
+func writeAskListToDB() {
+	buf, err := json.Marshal(askList)
+	if err != nil {
+		return
+	}
+	disk.Write("asks", buf)
 }
 
 func NewAsk(site, part, text string, maxPrice int) (ask, error) {
