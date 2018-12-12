@@ -62,7 +62,6 @@ func deleteHandler(ctx *fasthttp.RequestCtx) {
 	}()
 	defer ctx.Redirect("/", http.StatusTemporaryRedirect)
 
-	log.Println("deleteHandler")
 	param := string(ctx.FormValue("del"))
 	n, err := strconv.Atoi(param)
 	if err != nil {
@@ -80,7 +79,6 @@ func addHandler(ctx *fasthttp.RequestCtx) {
 		}
 	}()
 	defer ctx.Redirect("/", http.StatusTemporaryRedirect)
-	log.Println("addHandler")
 
 	site := string(ctx.FormValue("add"))
 	part := string(ctx.FormValue("part"))
